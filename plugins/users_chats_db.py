@@ -1,7 +1,7 @@
 import datetime
 import pytz
 from motor.motor_asyncio import AsyncIOMotorClient
-from info import IS_VERIFY, AUTH_CHANNEL, SHORTENER_WEBSITE3, SHORTENER_API3, THREE_VERIFY_GAP, LINK_MODE, FILE_CAPTION, TUTORIAL, TUTORIAL2, TUTORIAL3, DATABASE_NAME, DATABASE_URI, DATABASE_URI2, IMDB, IMDB_TEMPLATE, PROTECT_CONTENT, AUTO_DELETE, SPELL_CHECK, AUTO_FILTER, LOG_VR_CHANNEL, SHORTENER_WEBSITE, SHORTENER_API, SHORTENER_WEBSITE2, SHORTENER_API2, TWO_VERIFY_GAP
+from info import IS_VERIFY, AUTH_CHANNEL, FSUB_LINK, LINK_MODE, FILE_CAPTION, TUTORIAL, TUTORIAL2, DATABASE_NAME, DATABASE_URI, DATABASE_URI2, IMDB, IMDB_TEMPLATE, PROTECT_CONTENT, AUTO_DELETE, SPELL_CHECK, AUTO_FILTER, LOG_VR_CHANNEL, SHORTENER_WEBSITE, SHORTENER_API, SHORTENER_WEBSITE2, SHORTENER_API2, TWO_VERIFY_GAP
 
 client = AsyncIOMotorClient(DATABASE_URI)
 mydb = client[DATABASE_NAME]
@@ -16,7 +16,6 @@ class Database:
             'caption': FILE_CAPTION,
             'tutorial': TUTORIAL,
             'tutorial_two': TUTORIAL2,
-            'tutorial_three': TUTORIAL3,
             'shortner': SHORTENER_WEBSITE,
             'api': SHORTENER_API,
             'shortner_two': SHORTENER_WEBSITE2,
@@ -25,11 +24,9 @@ class Database:
             'imdb': IMDB,
             'link': LINK_MODE, 
             'is_verify': IS_VERIFY, 
-            'verify_time': TWO_VERIFY_GAP,
-            'shortner_three': SHORTENER_WEBSITE3,
-            'api_three': SHORTENER_API3,
+            'verify_time': 43200,
             'fsub_id': AUTH_CHANNEL,
-            'third_verify_time': THREE_VERIFY_GAP
+            'fsub_link': FSUB_LINK,
     }
     
     def __init__(self):
