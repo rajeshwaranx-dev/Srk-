@@ -27,7 +27,7 @@ async def pm_search(client, message):
     if PM_SEARCH:
         # ── FSub check for PM search ─────────────────────────────────────
         if AUTH_CHANNEL:
-            is_subbed = await db.find_join_req(message.from_user.id) or await is_req_subscribed(client, message)
+            is_subbed = await is_req_subscribed(client, message)
             if not is_subbed:
                 join_url = None
                 settings = await db.get_settings(0)
