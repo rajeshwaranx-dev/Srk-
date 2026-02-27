@@ -126,7 +126,7 @@ async def start(client:Client, message):
     settings = await get_settings(int(data.split("_", 2)[1]))
     id = settings.get('fsub_id', AUTH_CHANNEL)
     channel = int(id)
-    if settings.get('fsub_id', AUTH_CHANNEL) and not await is_subscribed(client, message.from_user.id, channel):
+    if settings.get('fsub_id', AUTH_CHANNEL) and not await db.find_join_req(message.from_user.id) and not await is_subscribed(client, message.from_user.id, channel):
         # ── FSub Join Button ────────────────────────────────────────────────
         # Use the stored fixed invite link (set via /setfsublink) if available.
         # This fixed link must have "Approve New Members" (Request to Join) enabled.
