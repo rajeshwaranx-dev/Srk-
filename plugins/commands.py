@@ -10,7 +10,7 @@ from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from database.ia_filterdb import Media, get_file_details
 from database.users_chats_db import db
-from info import ADMINS, THREE_VERIFY_GAP, LOG_CHANNEL, USERNAME, VERIFY_IMG, IS_VERIFY, AUTH_CHANNEL, FSUB_LINK, SHORTENER_WEBSITE, SHORTENER_API, SHORTENER_WEBSITE2, SHORTENER_API2, SHORTENER_API3, SHORTENER_WEBSITE3, LOG_API_CHANNEL, TWO_VERIFY_GAP, TUTORIAL, TUTORIAL2, TUTORIAL3, QR_CODE, DELETE_TIME
+from info import ADMINS, LOG_CHANNEL, USERNAME, VERIFY_IMG, IS_VERIFY, AUTH_CHANNEL, FSUB_LINK, SHORTENER_WEBSITE, SHORTENER_API, SHORTENER_WEBSITE2, SHORTENER_API2, LOG_API_CHANNEL, TWO_VERIFY_GAP, TUTORIAL, TUTORIAL2, QR_CODE, DELETE_TIME
 from utils import get_settings, save_group_settings, is_subscribed, is_req_subscribed, get_size, get_shortlink, is_check_admin, get_status, temp, get_readable_time
 import re
 import base64
@@ -167,25 +167,18 @@ async def start(client:Client, message):
         user_verified = await db.is_user_verified(user_id)
         settings = await get_settings(grp_id)
         is_second_shortener = await db.use_second_shortener(user_id, settings.get('verify_time', TWO_VERIFY_GAP)) 
-        is_third_shortener = await db.use_third_shortener(user_id, settings.get('third_verify_time', THREE_VERIFY_GAP))
-        if settings.get("is_verify", IS_VERIFY) and (not user_verified or is_second_shortener or is_third_shortener):
+        if settings.get("is_verify", IS_VERIFY) and (not user_verified or is_second_shortener):
             verify_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
             await db.create_verify_id(user_id, verify_id)
             temp.CHAT[user_id] = grp_id
-            verify = await get_shortlink(f"https://telegram.me/{temp.U_NAME}?start=notcopy_{user_id}_{verify_id}_{file_id}", grp_id, is_second_shortener, is_third_shortener)
-            if is_third_shortener:
-                rahul = settings.get('tutorial_three', TUTORIAL3)
-            else:
-                rahul = settings.get('tutorial_two', TUTORIAL2) if is_second_shortener else settings.get('tutorial', TUTORIAL)
+            verify = await get_shortlink(f"https://telegram.me/{temp.U_NAME}?start=notcopy_{user_id}_{verify_id}_{file_id}", grp_id, is_second_shortener, False)
+            rahul = settings.get('tutorial_two', TUTORIAL2) if is_second_shortener else settings.get('tutorial', TUTORIAL)
             buttons = [[
                 InlineKeyboardButton(text="✅️ ᴠᴇʀɪꜰʏ ✅️", url=verify),
                 InlineKeyboardButton(text="❗ ʜᴏᴡ ᴛᴏ ᴠᴇʀɪꜰʏ ❓", url=rahul)
             ]]
             reply_markup=InlineKeyboardMarkup(buttons)
-            if await db.user_verified(user_id): 
-                msg = script.THIRDT_VERIFICATION_TEXT
-            else:            
-                msg = script.SECOND_VERIFICATION_TEXT if is_second_shortener else script.VERIFICATION_TEXT
+            msg = script.SECOND_VERIFICATION_TEXT if is_second_shortener else script.VERIFICATION_TEXT
             d = await m.reply_text(
                 text=msg.format(message.from_user.mention, get_status()),
                 protect_content = True,
@@ -580,41 +573,6 @@ async def verifyon(bot, message):
     return await message.reply_text("✗ ᴠᴇʀɪꜰʏ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ ᴇɴᴀʙʟᴇᴅ.")
 
 
-@Client.on_message(filters.command('shortlink3'))
-async def set_shortner_3(c, m):
-    grp_id = m.chat.id
-    title = m.chat.title
-    if not await is_check_admin(c, grp_id, m.from_user.id):
-        return await m.reply_text('<b>ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀᴅᴍɪɴ ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ</b>')
-    if len(m.text.split()) == 1:
-        await m.reply("<b><u>ɪɴᴠᴀɪʟᴅ ꜰᴏʀᴍᴀᴛ!!</u>\n\nᴜsᴇ ʟɪᴋᴇ ᴛʜɪs -\n`/shortlink3 omegalinks.in 9c5a6c96077a1b499d8f953331221159383eb434`</b>")
-        return
-    sts = await m.reply("<b>♻️ ᴄʜᴇᴄᴋɪɴɢ...</b>")
-    await asyncio.sleep(1.2)
-    await sts.delete()
-    chat_type = m.chat.type
-    if chat_type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        return await m.reply_text("<b>ᴜꜱᴇ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ ɪɴ ɢʀᴏᴜᴘ...</b>")
-    try:
-        URL = m.command[1]
-        API = m.command[2]
-        resp = requests.get(f'https://{URL}/api?api={API}&url=https://youtube.com/@TechifyBots').json()
-        if resp['status'] == 'success':
-            SHORT_LINK = resp['shortenedUrl']
-        await save_group_settings(grp_id, 'shortner_three', URL)
-        await save_group_settings(grp_id, 'api_three', API)
-        await m.reply_text(f"<b>✅ <u>sᴜᴄᴄᴇssꜰᴜʟʟʏ ʏᴏᴜʀ 𝟹ʀᴅ sʜᴏʀᴛɴᴇʀ ɪs ᴀᴅᴅᴇᴅ</u>\n\nᴅᴇᴍᴏ - {SHORT_LINK}\n\nsɪᴛᴇ - `{URL}`\n\nᴀᴘɪ - `{API}`</b>", quote=True)
-        user_id = m.from_user.id
-        user_info = f"@{m.from_user.username}" if m.from_user.username else f"{m.from_user.mention}"
-        link = (await c.get_chat(m.chat.id)).invite_link
-        grp_link = f"[{m.chat.title}]({link})"
-        log_message = f"#New_Shortner_Set_For_3rd_Verify\n\nName - {user_info}\nId - `{user_id}`\n\nDomain name - {URL}\nApi - `{API}`\nGroup link - {grp_link}"
-        await c.send_message(LOG_API_CHANNEL, log_message, disable_web_page_preview=True)
-    except Exception as e:
-        await save_group_settings(grp_id, 'shortner_three', SHORTENER_WEBSITE3)
-        await save_group_settings(grp_id, 'api_three', SHORTENER_API3)
-        await m.reply_text(f"<b><u>💢 ᴇʀʀᴏʀ ᴏᴄᴄᴜʀᴇᴅ!!</u>\n\nᴀᴜᴛᴏ ᴀᴅᴅᴇᴅ ʙᴏᴛ ᴏᴡɴᴇʀ ᴅᴇꜰᴜʟᴛ sʜᴏʀᴛɴᴇʀ\n\nɪꜰ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴄʜᴀɴɢᴇ ᴛʜᴇɴ ᴜsᴇ ᴄᴏʀʀᴇᴄᴛ ꜰᴏʀᴍᴀᴛ ᴏʀ ᴀᴅᴅ ᴠᴀʟɪᴅ sʜᴏʀᴛʟɪɴᴋ ᴅᴏᴍᴀɪɴ ɴᴀᴍᴇ & ᴀᴘɪ\n\nʏᴏᴜ ᴄᴀɴ ᴀʟsᴏ ᴄᴏɴᴛᴀᴄᴛ ɪɴ ᴏᴜʀ <a href=https://telegram.me/NobiDeveloperSupport>sᴜᴘᴘᴏʀᴛ ɢʀᴏᴜᴘ</a> ꜰᴏʀ ꜱᴏʟᴠɪɴɢ ᴛʜɪs ɪssᴜᴇ...\n\n💔 ᴇʀʀᴏʀ - <code>{e}</code></b>", quote=True)
-
 @Client.on_message(filters.command('time2'))
 async def set_time_2(client, message):
     userid = message.from_user.id if message.from_user else None
@@ -633,25 +591,6 @@ async def set_time_2(client, message):
         return await message.reply_text("<b><u>ɪɴᴠᴀɪʟᴅ ꜰᴏʀᴍᴀᴛ!!</u>\n\nᴜsᴇ ʟɪᴋᴇ ᴛʜɪs - </b>`/time2 1800`")
     await save_group_settings(grp_id, 'verify_time', time)
     await message.reply_text(f"<b>sᴜᴄᴄᴇssꜰᴜʟʟʏ sᴇᴛ 𝟸ɴᴅ ᴠᴇʀɪꜰʏ ᴛɪᴍᴇ ꜰᴏʀ {title}\n\nᴛɪᴍᴇ - <code>{time} sec</code></b>")
-
-@Client.on_message(filters.command('time3'))
-async def set_time_3(client, message):
-    userid = message.from_user.id if message.from_user else None
-    if not userid:
-        return await message.reply("<b>ʏᴏᴜ ᴀʀᴇ ᴀɴᴏɴʏᴍᴏᴜꜱ ᴀᴅᴍɪɴ ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ...</b>")
-    chat_type = message.chat.type
-    if chat_type not in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
-        return await message.reply_text("<b>ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪɴ ɢʀᴏᴜᴘ...</b>")       
-    grp_id = message.chat.id
-    title = message.chat.title
-    if not await is_check_admin(client, grp_id, message.from_user.id):
-        return await message.reply_text('<b>ʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴀᴅᴍɪɴ ɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ</b>')
-    try:
-        time = int(message.text.split(" ", 1)[1])
-    except:
-        return await message.reply_text("<b><u>ɪɴᴠᴀɪʟᴅ ꜰᴏʀᴍᴀᴛ!!</u>\n\nᴜsᴇ ʟɪᴋᴇ ᴛʜɪs - </b>`/time3 3600`")
-    await save_group_settings(grp_id, 'third_verify_time', time)
-    await message.reply_text(f"<b>sᴜᴄᴄᴇssꜰᴜʟʟʏ sᴇᴛ 𝟹ʀᴅ ᴠᴇʀɪꜰʏ ᴛɪᴍᴇ ꜰᴏʀ {title}\n\nᴛɪᴍᴇ - <code>{time} sec</code></b>")
 
 @Client.on_message(filters.command('fsub'))
 async def set_fsub(client, message):
