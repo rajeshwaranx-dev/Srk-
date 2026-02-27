@@ -67,7 +67,7 @@ async def pm_search(client, message):
         await message.reply_text("⚠️ ꜱᴏʀʀʏ ɪ ᴄᴀɴ'ᴛ ᴡᴏʀᴋ ɪɴ ᴘᴍ")
 
 
-@Client.on_callback_query(filters.regex(r"^pm_checksub$") & filters.private)
+@Client.on_callback_query(filters.regex(r"^pm_checksub$"))
 async def pm_checksub_handler(client, query):
     """
     Try Again button handler for PM FSub check.
