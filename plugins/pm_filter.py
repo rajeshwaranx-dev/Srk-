@@ -9,7 +9,7 @@ from info import MAX_BTN, BIN_CHANNEL, USERNAME, URL, IS_VERIFY, LANGUAGES, AUTH
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, WebAppInfo 
 from pyrogram import Client, filters, enums
 from pyrogram.errors import MessageNotModified
-from utils import temp, get_settings, is_check_admin, get_status, get_hash, get_name, get_size, save_group_settings, get_poster, get_readable_time, get_shortlink, is_req_subscribed, imdb
+from utils import temp, get_settings, is_check_admin, get_status, get_hash, get_name, get_size, save_group_settings, get_poster, get_status, get_readable_time, get_shortlink, is_req_subscribed, imdb
 from database.users_chats_db import db
 from database.ia_filterdb import Media, get_search_results, get_bad_files, get_file_details
 
@@ -43,7 +43,7 @@ async def _get_fsub_join_url(client):
     return join_url
 
 
-@Client.on_message(filters.private & filters.text & filters.incoming & ~filters.regex(r"^/"))
+@Client.on_message(filters.private & filters.text & filters.incoming)
 async def pm_search(client, message):
     if PM_SEARCH:
         # ── FSub check for PM search ─────────────────────────────────────
@@ -279,7 +279,7 @@ async def lang_search(client: Client, query: CallbackQuery):
             links += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file.file_id}>[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}</a></b>"""
     else:
         btn = [[
-                InlineKeyboardButton(text=f"🔗 {get_size(file.file_size)}≽ {get_name(file.file_name)}", url=f'https://telegram.dog/{temp.U_NAME}?start=file_{query.message.chat.id}_{file.file_id}'),]
+                InlineKeyboardButton(text=f"🔗 {get_size(file.file_size)}≽ {get_name(file.file_name)}", callback_data=f'files#{reqnxt}#{file.file_id}'),]
                    for file in files
               ]
     if not settings["is_verify"]:
@@ -332,7 +332,7 @@ async def lang_next_page(bot, query):
             links += f"""<b>\n\n{file_num}. <a href=https://t.me/{temp.U_NAME}?start=file_{query.message.chat.id}_{file.file_id}>[{get_size(file.file_size)}] {' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@') and not x.startswith('www.'), file.file_name.split()))}</a></b>"""
     else:
         btn = [[
-            InlineKeyboardButton(text=f"🔗 {get_size(file.file_size)}≽ {get_name(file.file_name)}", url=f'https://telegram.dog/{temp.U_NAME}?start=file_{query.message.chat.id}_{file.file_id}')
+            InlineKeyboardButton(text=f"🔗 {get_size(file.file_size)}≽ {get_name(file.file_name)}", callback_data=f'file#{file.file_id}')
         ]
             for file in files
         ]
@@ -475,21 +475,17 @@ async def cb_handler(client: Client, query: CallbackQuery):
         buttons = [[
             InlineKeyboardButton('⇆ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘs ⇆', url=f'http://t.me/{temp.U_NAME}?startgroup=start')
         ],[
-             InlineKeyboardButton('🚫 Want your own Bot? 🚫', callback_data='earn')
-        ],[
             InlineKeyboardButton('⚙ ꜰᴇᴀᴛᴜʀᴇs', callback_data='features'),
             InlineKeyboardButton('💸 ᴘʀᴇᴍɪᴜᴍ', callback_data='buy_premium')
-
+        ],[
+            InlineKeyboardButton('🚫 ᴇᴀʀɴ ᴍᴏɴᴇʏ ᴡɪᴛʜ ʙᴏᴛ 🚫', callback_data='earn')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
-        try:
-            await query.message.edit_text(
-                text=script.START_TXT.format(query.from_user.mention, get_status(), query.from_user.id),
-                reply_markup=reply_markup,
-                parse_mode=enums.ParseMode.HTML
-            )
-        except Exception:
-            pass
+        await query.message.edit_text(
+            text=script.START_TXT.format(query.from_user.mention, get_status(), query.from_user.id),
+            reply_markup=reply_markup,
+            parse_mode=enums.ParseMode.HTML
+        )      
     elif query.data == "features":
         buttons = [[
             InlineKeyboardButton('📸 ɪᴍᴀɢᴇ', callback_data='rahul'),
