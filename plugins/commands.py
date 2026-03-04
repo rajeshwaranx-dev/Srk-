@@ -79,7 +79,7 @@ async def start(client:Client, message):
             InlineKeyboardButton('⚙ ꜰᴇᴀᴛᴜʀᴇs', callback_data='features'),
             InlineKeyboardButton('💸 ᴘʀᴇᴍɪᴜᴍ', callback_data='buy_premium')
         ],[
-            InlineKeyboardButton('🚫 ᴇWant your own Bot? 🚫', callback_data='earn')
+            InlineKeyboardButton('🚫 Want your own Bot? 🚫', callback_data='earn')
         ]]   
         reply_markup = InlineKeyboardMarkup(buttons)
         await message.reply_text(script.START_TXT.format(message.from_user.mention, get_status(), message.from_user.id),
